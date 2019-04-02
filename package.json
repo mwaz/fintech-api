@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mwaz/fintech.git"
+    "url": "git+https://github.com/mwaz/fintech-api.git"
   },
   "keywords": [
     "fintech"
@@ -57,7 +57,7 @@
     "supertest": "^3.1.0"
   },
   "bugs": {
-    "url": "https://github.com/mwaz/fintech/issues"
+    "url": "https://github.com/mwaz/fintech-api/issues"
   },
-  "homepage": "https://github.com/mwaz/fintech#readme"
+  "homepage": "https://github.com/mwaz/fintech-api#readme"
 }
