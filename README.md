@@ -2,6 +2,8 @@
 
 ## Fintech 
 
+![fin](https://user-images.githubusercontent.com/10160787/55380811-0311db00-552a-11e9-9f51-f1f474fb0574.png)
+
 A CRUD API app built on node, express, mongodb and Passport.
 
 
