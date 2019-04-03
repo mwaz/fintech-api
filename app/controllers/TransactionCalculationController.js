@@ -2,7 +2,10 @@
 
 import Controller from './index';
 import TransactionCalculation from '../models/TransactionCalculation';
+import InterestTransactions from '../models/TransactionModel';
 import moment from 'moment';
+import perf from 'execution-time'
+let performance = perf();
 
 
 export default class TransactionCalculationController extends Controller {
@@ -11,6 +14,8 @@ export default class TransactionCalculationController extends Controller {
           amount: 'required|number',
         });
     
+        performance.start();
+
         const { amount }  = body;
         let cost = 0;
 
@@ -27,14 +32,16 @@ export default class TransactionCalculationController extends Controller {
           if(amount > 1000 && amount <1501){
             return cost = 25
           }
-          if(amount < 0 ){
+          if(amount < 0 || amount > 1500){
             return res.status(400).jsend.fail({ message: 'Oops! invalid amount' })
           }
         }
+        const completedTime =  performance.stop();
 
         const newTransaction = await TransactionCalculation.create({
             amount,
             cost: calculateTransactionCost(amount),
+            exeutionTime: completedTime.time,
             transactionType: 'transaction-matrix'
         });
         return res.status(201).jsend.success({ transaction: newTransaction })
@@ -47,6 +54,7 @@ export default class TransactionCalculationController extends Controller {
     
         const { amount }  = body;
         
+        performance.start();
 
         const calculateWitheldTax = (amount) => {
           if(amount < 0 ){
@@ -56,10 +64,11 @@ export default class TransactionCalculationController extends Controller {
           return witheldAmount
          
         }
-
+        const completedTime =  performance.stop();
         const newTransaction = await TransactionCalculation.create({
             amount,
             withheldTax: calculateWitheldTax(amount),
+            exeutionTime: completedTime.time,
             transactionType: 'withholding-tax'
         });
         return res.status(201).jsend.success({ transaction: newTransaction })
@@ -69,9 +78,8 @@ export default class TransactionCalculationController extends Controller {
         await super.validate(body, {
           amount: 'required|number',
         });
-    
+        performance.start()
         const { amount }  = body;
-        
 
         const calculateVat = (amount) => {
           if(amount < 0 ){
@@ -81,10 +89,12 @@ export default class TransactionCalculationController extends Controller {
           return totalAmount
          
         }
+        const completedTime =  performance.stop();
 
         const newTransaction = await TransactionCalculation.create({
             amount,
             taxedTotal: calculateVat(amount),
+            exeutionTime: completedTime.time,
             transactionType: 'VAT-tax'
         });
         return res.status(201).jsend.success({ transaction: newTransaction })
@@ -95,7 +105,8 @@ export default class TransactionCalculationController extends Controller {
           amount: 'required|number',
           discount: 'required|number',
         });
-    
+
+        performance.start();
         const { amount, discount }  = body;
         
 
@@ -107,10 +118,12 @@ export default class TransactionCalculationController extends Controller {
           return discountedAmount
          
         }
+        const completedTime =  performance.stop();
 
         const newTransaction = await TransactionCalculation.create({
             amount,
             discount: calculateDiscount(amount),
+            exeutionTime: completedTime.time,
             transactionType: 'discounted-items'
         });
         return res.status(201).jsend.success({ transaction: newTransaction })
@@ -120,7 +133,8 @@ export default class TransactionCalculationController extends Controller {
         await super.validate(body, {
           date: 'required|date',
         });
-    
+        performance.start();
+
         const { date }  = body;
         
 
@@ -147,14 +161,29 @@ export default class TransactionCalculationController extends Controller {
            const remainingDays = allDays-currentDate
            return remainingDays
         }
-
+        const completedTime =  performance.stop();
         const newTransaction = await TransactionCalculation.create({
             numberOfDaysLeftInMonth: calculateMonthlyDays(date),
             numberOfMonthsLeftInYear: calculateMonths(date),
             numberOfDaysLeftInYear: calculateYearlyDays(date),
+            executionTime: completedTime.time,
             transactionType: 'date-calculation'
         });
         return res.status(201).jsend.success({ transaction: newTransaction })
       }
     
+      async queryAllTransactions (req, res) {
+        performance.start();
+        const transactions = await TransactionCalculation.find({
+        }).sort({'createdAt': 'desc'});
+        const interestTransactions = await InterestTransactions.find({
+        }).sort({'createdAt': 'desc'});
+        const completedTime =  performance.stop();
+
+        return res.status(201).jsend.success({
+            normalTransactions: transactions,
+            interestTransactions,
+            executionFetchTime: completedTime.time
+         })
+    }
 }

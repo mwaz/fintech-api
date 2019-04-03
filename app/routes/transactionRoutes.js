@@ -1,12 +1,14 @@
 import { Router } from 'express';
+import passport from 'passport';
 import catchErrors from 'async-error-catcher'
 import TransactionController from '../controllers/TransactionController';
 
+const authenticatedRoutes = passport.authenticate("jwt", {session: false} );
 const trasactionController = new TransactionController();
 const router = new Router();
 
-router.post('/compound-interest', catchErrors(trasactionController.compoundInterest));
-router.post('/simple-interest', catchErrors(trasactionController.simpleInterest));
+router.post('/compound-interest', authenticatedRoutes, catchErrors(trasactionController.compoundInterest));
+router.post('/simple-interest', authenticatedRoutes, catchErrors(trasactionController.simpleInterest));
 
 
 

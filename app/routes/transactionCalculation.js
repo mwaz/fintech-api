@@ -1,15 +1,18 @@
 import { Router } from 'express';
+import passport from 'passport';
 import catchErrors from 'async-error-catcher'
 import TransactionController from '../controllers/TransactionCalculationController';
 
+const authenticatedRoutes = passport.authenticate("jwt", {session: false} );
 const trasactionController = new TransactionController();
 const router = new Router();
 
-router.post('/transaction-matrix', catchErrors(trasactionController.transactionMatrix));
-router.post('/witholding-tax', catchErrors(trasactionController.withholdingTax));
-router.post('/vat-tax', catchErrors(trasactionController.Vat));
-router.post('/discounts', catchErrors(trasactionController.discountedProducts));
-router.post('/date-calculations', catchErrors(trasactionController.dateCalculations));
+router.post('/transaction-matrix', authenticatedRoutes, catchErrors(trasactionController.transactionMatrix));
+router.post('/witholding-tax', authenticatedRoutes, catchErrors(trasactionController.withholdingTax));
+router.post('/vat-tax', authenticatedRoutes, catchErrors(trasactionController.Vat));
+router.post('/discounts', authenticatedRoutes, catchErrors(trasactionController.discountedProducts));
+router.post('/date-calculations', authenticatedRoutes, catchErrors(trasactionController.dateCalculations));
+router.get('/', authenticatedRoutes, catchErrors(trasactionController.queryAllTransactions));
 
 
 router.use((error, req, res, next) => {

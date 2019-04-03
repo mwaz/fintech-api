@@ -31,6 +31,9 @@ const TransactionCalculationSchema = new mongoose.Schema({
     date: {
         type: Date
       },
+    executionTime: {
+      type: Number
+    },
   },
   {
     timestamps: true

@@ -1,0 +1,370 @@
+swagger: "2.0"
+info:
+    title: Fintech API
+    description: Fintech Test API
+    version: 1.0.0
+
+servers:
+  - url: {protocol}://127.0.0.1:{port}
+    description: Development server (uses test data)
+    variables:
+      port:
+        enum:
+          - '3002'
+          - '3003'
+        default: '3001'
+      protocol:
+        enum:
+          - 'http'
+          - 'https'
+        default: 'https'
+
+securityDefinitions:
+      apiKey:
+        type: apiKey
+        in: header
+        name: Authorization
+
+basePath: /fintech/api
+schemes: 
+    - https
+    - http
+   
+
+security:
+    - apiKey: []
+consumes:
+    - application/json
+
+paths:
+  /users/signup:
+    post:
+      summary: Register a new user to the system
+      description: New users must have username, passwords and phone numbers as a requirement
+      tags:
+        - Auth
+      parameters:
+        - in: body
+          name: username
+          description: Unique username of the person registering to the system
+          required: true
+          name: phone
+          description: Unique phone number of the person registering to the system
+          required: true
+          name: password
+          description: password for authentication of the person registering to the system
+          required: true
+          schema:
+            $ref: '#/components/schemas/UserRegister'
+      responses:
+        201:
+          description: User has been registered
+        409:
+          description: User/Phone already exists
+        422:
+          description: Kindly fill in all required fields
+        500:
+          $ref: '#/components/errors/internalServerError'
+
+  /users/login:
+    post:
+      summary: login a registered user to the system
+      description: Logged in users obtain privilleges to send and receive messages and to also create and delete contacts
+      tags:
+        - Auth
+      parameters:
+        - in: body
+          name: username
+          description: Unique username of the person loggin in to the system
+          required: true
+          name: password
+          description: password for authentication of the person loggin in to the system
+          required: true
+          schema:
+            $ref: '#/components/schemas/UserLogin'
+      responses:
+        200:
+          description: User has been Logged in
+        422:
+          description: Kindly fill in all required fields
+        500:
+          $ref: '#/components/errors/internalServerError'
+    
+  /transactions/simple-interest:
+    post:
+      summary: Calculate Simple Interest
+      description: A user can calculate Simple Interest from the API
+      tags:
+        - Interest Transactions
+      security:
+        - apiKey: []
+      parameters:
+        - in: body
+          name: principle
+          description: initial amount
+          required: true
+          name: rates
+          description: Annual rates used to caclulate accrued interests
+          name: period
+          description: Time taken to repay amount in full (MUST be in months)
+          required: true
+          schema:
+            $ref: '#/components/schemas/SimpleInterest'
+      responses:
+        201: 
+          description: Successfully calculated interest
+        422:
+          description: Kindly fill in all required fields
+        500:
+          $ref: '#/components/errors/internalServerError'
+
+  /transactions/compound-interest:
+    post:
+      summary: Calculate Compound Interest
+      description: A user can calculate Compund Interest from the API
+      tags:
+        - Interest Transactions
+      security:
+        - apiKey: []
+      parameters:
+        - in: body
+          name: principle
+          description: initial amount
+          required: true
+          name: rates
+          description: Annual rates used to caclulate accrued interests
+          name: period
+          description: Time taken to repay amount in full (MUST be in months)
+          required: true
+          name: frequencyOfApplyingInterest
+          description: Time which interest is applied could be (annually(1), bienially(2), quaterly (1/4))
+          required: true
+          schema:
+            $ref: '#/components/schemas/CompoundInterest'
+      responses:
+        201: 
+          description: Successfully calculated interest
+        422:
+          description: Kindly fill in all required fields
+        500:
+          $ref: '#/components/errors/internalServerError'
+
+  /transactions/calculations/transaction-matrix:
+    post:
+      summary: Determine the cost of a transaction by supplying a price range
+      description: One can transaction costs between 0 and 1500
+      tags:
+        - Calculated Transactions
+      security:
+        - apiKey: []
+      parameters:
+        - in: body
+          name: amount
+          description: supplied transaction range
+          required: true
+          schema:
+            $ref: '#/components/schemas/AmountSchema'
+      responses:
+        200: 
+          description: successfully calculated transaction
+        500:
+          $ref: '#/components/errors/internalServerError'
+
+  /transactions/calculations/witholding-tax:
+    post:
+      summary: Determine the witheld tax from a given sum of money
+      description: One can calculate the withholding tax from a given amount of money 
+      tags:
+        - Calculated Transactions
+      security:
+        - apiKey: []
+      parameters:
+        - in: body
+          name: amount
+          description: amount to calculate tax for
+          required: true
+      schema:
+            $ref: '#/components/schemas/AmountSchema'
+      responses:
+        200: 
+          description: successfully calculated Tax
+        422:
+          description: Kindly fill in all required fields
+        500:
+          $ref: '#/components/errors/internalServerError'
+
+  /transactions/calculations/vat-tax:
+    post:
+      summary: Determine the total after VAT tax is added to a given amount of money
+      description: One can calculate the VAT tax of a product from a given amount of money 
+      tags:
+        - Calculated Transactions
+      security:
+        - apiKey: []
+      parameters:
+        - in: body
+          name: amount
+          description: amount to calculate tax for
+          required: true
+          schema:
+            $ref: '#/components/schemas/AmountSchema'
+      responses:
+        200: 
+          description: successfully calculated Tax
+        422:
+          description: Kindly fill in all required fields
+        500:
+          $ref: '#/components/errors/internalServerError'
+
+  /transactions/calculations/date-calculations:
+    post:
+      summary: Calcualate date transactions based on various requirements 
+      description: One can calculate remaining dates in an year, month and remaining months in an year
+      tags:
+        - Calculated Transactions
+      security:
+        - apiKey: []
+      parameters:
+        - in: body
+          name: date
+          description: date to use for calculations
+          required: true
+          schema:
+            $ref: '#/components/schemas/DateSchema'
+      responses:
+        200: 
+          description: successfully calculated date transaction
+        422:
+          description: Kindly fill in all required fields
+        500:
+          $ref: '#/components/errors/internalServerError'
+
+  /transactions/calculations/discounts:
+    post:
+      summary: Determine the total payable after discount has been applied to an amount
+      description: One can calculate the discounted price of a commodity after applying a discount
+      tags:
+        - Calculated Transactions
+      security:
+        - apiKey: []
+      parameters:
+        - in: body
+          name: amount
+          description: amount to calculate discount for
+          required: true
+          name: discount
+          description: discount to be applied in a particular pricing 
+          required: true
+          schema:
+            $ref: '#/components/schemas/DiscountSchema'
+      responses:
+        200: 
+          description: successfully calculated Tax
+        422:
+          description: Kindly fill in all required fields
+        500:
+          $ref: '#/components/errors/internalServerError'
+
+  /transactions/calculations/:
+    get:
+      summary: Get all transactions sorted in descending order
+      description: All transactions can be fetched in ascending and descending order and in their specific forms
+      tags:
+        - Queries
+      security:
+        - apiKey: []
+      responses:
+        200:
+          description: All transactions retrived successfully
+        500:
+          $ref: '#/components/errors/internalServerError'
+    
+components:
+  schemas:
+    UserRegister:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        phone:
+          type: number
+      example:
+        username: test1234
+        password: test1234
+        phone: 34256789
+
+    UserLogin:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      example:
+        username: test1234
+        password: test1234
+
+    SimpleInterest:
+      type: object
+      properties:
+        principle:
+          type: number
+        rates:
+          type: number
+        period:
+          type: number
+      example:
+        principle: 10000
+        rates: 12
+        period: 24
+
+    CompoundInterest:
+      type: object
+      properties:
+        principle:
+          type: number
+        rates:
+          type: number
+        period:
+          type: number
+        frequencyOfApplyingInterest:
+          type: number
+      example:
+        principle: 10000
+        rates: 12.4
+        period: 24
+        frequencyOfApplyingInterest: 4
+        
+
+    AmountSchema:
+      type: object
+      properties:
+        amount:
+          type: number
+      example:
+        amount: 1000
+
+    DateSchema:
+      type: object
+      properties:
+        date:
+          type: string
+      example:
+        date: "2019,05,01"
+
+    DiscountSchema:
+      type: object
+      properties:
+        amount:
+          type: number
+        discount:
+          type: number
+      example:
+        amount: 2000
+        discount: 10
+
+  errors:
+    internalServerError:
+      description: Something went wrong on the server

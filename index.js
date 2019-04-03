@@ -40,7 +40,7 @@ app.use(passport.session());
 
 require("./utils/auth/passport")(passport);
 app.get("/", (req, res) => {
-  res.send("Invalid Endpoint");
+  res.redirect('/api-docs');
 });
 
 const port = process.env.PORT || dBConfig.port || 3005;

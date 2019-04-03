@@ -2,6 +2,10 @@
 
 import Controller from './index';
 import Transaction from '../models/TransactionModel'
+import perf from 'execution-time'
+let performance = perf();
+
+
 
 export default class InterestController extends Controller {
     async compoundInterest ({ body }, res) {
@@ -11,8 +15,9 @@ export default class InterestController extends Controller {
           rates: 'required|number',
           frequencyOfApplyingInterest: 'required|number'
         });
-    
       
+        performance.start();
+
         const { principle, period, rates, frequencyOfApplyingInterest }  = body;
 
         const calculateInterest = () => {
@@ -24,11 +29,14 @@ export default class InterestController extends Controller {
           const interest = amount - principle
           return interest
         }
+        const completedTime =  performance.stop();
+
         const newTransaction = await Transaction.create({
           principle,
             period,
             rates,
             interest: calculateInterest(),
+            exeutionTime: completedTime.time,
             transactionType: 'compound-interest'
         });
         return res.status(201).jsend.success({ transaction: newTransaction })
@@ -41,6 +49,7 @@ export default class InterestController extends Controller {
           rates: 'required|number',
         });
     
+        performance.start();
         const { principle, period, rates }  = body;
 
         const calculateInterest = () => {
@@ -49,11 +58,14 @@ export default class InterestController extends Controller {
           const interest = principle * interestRates * time;
           return interest
         }
+        
+        const completedTime =  performance.stop();
         const newTransaction = await Transaction.create({
           principle,
             period,
             rates,
             interest: calculateInterest(),
+            exeutionTime: completedTime.time,
             transactionType: 'simple-interest'
         });
         return res.status(201).jsend.success({ transaction: newTransaction })

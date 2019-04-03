@@ -22,7 +22,10 @@ const TransactionSchema = new mongoose.Schema({
     },
     frequencyOfApplyingInterest: {
       type: Number
-    }
+    },
+    executionTime: {
+      type: Number
+    },
   },
   {
     timestamps: true
