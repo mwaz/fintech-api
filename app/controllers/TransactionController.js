@@ -36,7 +36,7 @@ export default class InterestController extends Controller {
             period,
             rates,
             interest: calculateInterest(),
-            exeutionTime: completedTime.time,
+            executionTime: completedTime.time,
             transactionType: 'compound-interest'
         });
         return res.status(201).jsend.success({ transaction: newTransaction })
@@ -65,7 +65,7 @@ export default class InterestController extends Controller {
             period,
             rates,
             interest: calculateInterest(),
-            exeutionTime: completedTime.time,
+            executionTime: completedTime.time,
             transactionType: 'simple-interest'
         });
         return res.status(201).jsend.success({ transaction: newTransaction })
